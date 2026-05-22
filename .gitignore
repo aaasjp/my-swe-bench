@@ -170,5 +170,4 @@ cython_debug/
 data/repos/copies
 notebooks/
 *logs/
-.evaluate_result_partial/
-evaluate_result.json
+.predict_result_partial/

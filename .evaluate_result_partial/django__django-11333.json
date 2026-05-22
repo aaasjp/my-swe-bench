@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-11333",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "diff --git a/django/urls/resolvers.py b/django/urls/resolvers.py\n--- a/django/urls/resolvers.py\n+++ b/django/urls/resolvers.py\n@@ -66,10 +66,13 @@ def get_ns_resolver(ns_pattern, resolver, converters):\n     return URLResolver(RegexPattern(r'^/'), [ns_resolver])\n\n\n-def get_resolver(urlconf=None):\n+def get_resolver(urlconf=None):\n     if urlconf is None:\n         urlconf = settings.ROOT_URLCONF\n-    return URLResolver(RegexPattern(r'^/'), urlconf)\n+    return _get_cached_resolver(urlconf)\n+\n+\n+@functools.lru_cache(maxsize=None)\ndef _get_cached_resolver(urlconf):\n     return URLResolver(RegexPattern(r'^/'), urlconf)\n"
+}

@@ -1,0 +1,5 @@
+{
+  "instance_id": "pytest-dev__pytest-10051",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/src/_pytest/logging.py\n+++ b/src/_pytest/logging.py\n@@ -342,7 +342,7 @@ class LogCaptureHandler(logging_StreamHandler):\n         super().emit(record)\n\n     def reset(self) -> None:\n-        self.records = []\n+        self.records.clear()\n         self.stream = StringIO()\n\n     def handleError(self, record: logging.LogRecord) -> None:"
+}

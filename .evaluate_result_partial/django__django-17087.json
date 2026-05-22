@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-17087",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/django/db/migrations/serializer.py\n+++ b/django/db/migrations/serializer.py\n@@ -168,7 +168,7 @@ class FunctionTypeSerializer(BaseSerializer):\n            klass = self.value.__self__\n            module = klass.__module__\n            return \"%s.%s.%s\" % (module, klass.__qualname__, self.value.__name__), {\n                \"import %s\" % module\n            }\n"
+}

@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-16032",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py\nindex abc1234..def5678 100644\n--- a/django/db/models/sql/query.py\n+++ b/django/db/models/sql/query.py\n@@ -265,7 +265,7 @@ class Query(BaseExpression):\n     @property\n     def has_select_fields(self):\n         return bool(\n-            self.select or self.annotation_select_mask or self.extra_select_mask\n+            self.select or self.annotation_select or self.extra_select_mask\n         )\n \n     @cached_property\n"
+}

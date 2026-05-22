@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-15851",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/django/db/backends/postgresql/client.py\n+++ b/django/db/backends/postgresql/client.py\n@@ -32,8 +32,8 @@ class DatabaseClient(BaseDatabaseClient):\n             args += [\"-h\", host]\n         if port:\n             args += [\"-p\", str(port)]\n-        if dbname:\n-            args += [dbname]\n         args.extend(parameters)\n+        if dbname:\n+            args += [dbname]\n\n         env = {}\n         if passwd:"
+}

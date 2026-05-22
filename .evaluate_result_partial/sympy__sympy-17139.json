@@ -1,0 +1,5 @@
+{
+  "instance_id": "sympy__sympy-17139",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/sympy/simplify/fu.py\n+++ b/sympy/simplify/fu.py\n@@ -501,6 +501,8 @@ def _TR56(rv, f, g, h, max, pow):\n         if not (rv.is_Pow and rv.base.func == f):\n             return rv\n \n+        if rv.exp.is_extended_real is False:\n+            return rv\n         if (rv.exp < 0) == True:\n             return rv\n         if (rv.exp > max) == True:\n"
+}

@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-16612",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/django/contrib/admin/sites.py\n+++ b/django/contrib/admin/sites.py\n@@ -453,7 +453,13 @@ class AdminSite:\n                 pass\n             else:\n                 if getattr(match.func, \"should_append_slash\", True):\n-                    return HttpResponsePermanentRedirect(\"%s/\" % request.path)\n+                    path = request.path + \"/\"\n+                    if request.META.get(\"QUERY_STRING\"):\n+                        path += \"?\" + request.META[\"QUERY_STRING\"]\n+                    return HttpResponsePermanentRedirect(path)\n         raise Http404\n"
+}

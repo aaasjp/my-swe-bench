@@ -1,0 +1,5 @@
+{
+  "instance_id": "sympy__sympy-12096",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "diff --git a/sympy/core/function.py b/sympy/core/function.py\nindex abc1234..def5678 100644\n--- a/sympy/core/function.py\n+++ b/sympy/core/function.py\n@@ -507,7 +507,11 @@ class Function(Application, Expr):\n             func = getattr(mpmath, fname)\n         except (AttributeError, KeyError):\n             try:\n-                return Float(self._imp_(*self.args), prec)\n+                # Evaluate args recursively before calling _imp_\n+                args = [arg.evalf(prec) for arg in self.args]\n+                result = self._imp_(*args)\n+                # If result is still a SymPy expression, evaluate it recursively\n+                return result.evalf(prec) if hasattr(result, \"evalf\") else Float(result, prec)\n             except (AttributeError, TypeError, ValueError):\n                 return\n"
+}

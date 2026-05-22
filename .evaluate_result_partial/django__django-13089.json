@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-13089",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/django/core/cache/backends/db.py\n+++ b/django/core/cache/backends/db.py\n@@ -267,7 +267,9 @@ class DatabaseCache(BaseDatabaseCache):\n                 cursor.execute(\n                     connection.ops.cache_key_culling_sql() % table,\n                     [cull_num])\n-                cursor.execute(\"DELETE FROM %s \"\n-                               \"WHERE cache_key < %%s\" % table,\n-                               [cursor.fetchone()[0]])\n+                last_cache_key = cursor.fetchone()\n+                if last_cache_key:\n+                    cursor.execute(\"DELETE FROM %s \"\n+                                   \"WHERE cache_key < %%s\" % table,\n+                                   [last_cache_key[0]])\n"
+}

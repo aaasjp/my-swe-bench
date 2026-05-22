@@ -1,0 +1,5 @@
+{
+  "instance_id": "psf__requests-2931",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/requests/models.py\n+++ b/requests/models.py\n@@ -80,7 +80,10 @@ class RequestEncodingMixin(object):\n         if parameters are supplied as a dict.\n         \"\"\"\n \n-        if isinstance(data, (str, bytes)):\n+        if isinstance(data, bytes):\n+            return data\n+        elif isinstance(data, str):\n             return to_native_string(data)\n         elif hasattr(data, 'read'):\n             return data\n"
+}

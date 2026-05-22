@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-16429",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/django/utils/timesince.py\n+++ b/django/utils/timesince.py\n@@ -97,6 +97,8 @@ def timesince(d, now=None, reversed=False, time_strings=None, depth=2):\n             min(MONTHS_DAYS[pivot_month - 1], d.day),\n             d.hour,\n             d.minute,\n             d.second,\n+            0,\n+            d.tzinfo,\n         )\n     else:\n         pivot = d\n"
+}

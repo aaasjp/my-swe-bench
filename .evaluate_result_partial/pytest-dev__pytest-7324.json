@@ -1,0 +1,5 @@
+{
+  "instance_id": "pytest-dev__pytest-7324",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/src/_pytest/mark/expression.py\n+++ b/src/_pytest/mark/expression.py\n@@ -162,7 +162,13 @@ def not_expr(s: Scanner) -> ast.expr:\n    ident = s.accept(TokenType.IDENT)\n    if ident:\n-        return ast.Name(ident.value, ast.Load())\n+        if ident.value == \"False\":\n+            return ast.Constant(False)  # type: ignore[attr-defined]\n+        elif ident.value == \"True\":\n+            return ast.Constant(True)  # type: ignore[attr-defined]\n+        elif ident.value == \"None\":\n+            return ast.Constant(None)  # type: ignore[attr-defined]\n+        else:\n+            return ast.Name(ident.value, ast.Load())\n    s.reject((TokenType.NOT, TokenType.LPAREN, TokenType.IDENT))\n"
+}

@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-12325",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "diff --git a/django/db/models/base.py b/django/db/models/base.py\nindex abc1234..def5678 100644\n--- a/django/db/models/base.py\n+++ b/django/db/models/base.py\n@@ -203,7 +203,7 @@ class ModelBase(type):\n             # Skip concrete parent classes.\n             if base != new_class and not base._meta.abstract:\n                 continue\n             # Locate OneToOneField instances.\n             for field in base._meta.local_fields:\n-                if isinstance(field, OneToOneField):\n+                if isinstance(field, OneToOneField) and field.remote_field.parent_link:\n                     related = resolve_relation(new_class, field.remote_field.model)\n                     parent_links[make_model_tuple(related)] = field\n"
+}

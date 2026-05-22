@@ -1,0 +1,5 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-26194",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/sklearn/metrics/_ranking.py\n+++ b/sklearn/metrics/_ranking.py\n@@ -1083,7 +1083,12 @@ def roc_curve(\n    # to make sure that the curve starts at (0, 0)\n    tps = np.r_[0, tps]\n    fps = np.r_[0, fps]\n-   thresholds = np.r_[thresholds[0] + 1, thresholds]\n+   # Clip the artificial threshold to 1 for probability estimates (i.e., when\n+   # max(y_score) <= 1) since thresholds should not exceed 1 for probabilities.\n+   if thresholds[0] < 1:\n+       thresholds = np.r_[1, thresholds]\n+   else:\n+       thresholds = np.r_[thresholds[0] + 1, thresholds]\n\n    if fps[-1] <= 0:\n        warnings.warn("
+}

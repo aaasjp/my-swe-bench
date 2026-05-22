@@ -1,0 +1,5 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-10908",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/sklearn/feature_extraction/text.py\n+++ b/sklearn/feature_extraction/text.py\n@@ -992,6 +992,9 @@ class CountVectorizer(BaseEstimator, VectorizerMixin):\n\n    def get_feature_names(self):\n        \"\"\"Array mapping from feature integer indices to feature name\"\"\"\n+        if not hasattr(self, 'vocabulary_'):\n+            self._validate_vocabulary()\n+\n        self._check_vocabulary()\n\n        return [t for t, i in sorted(six.iteritems(self.vocabulary_),\n"
+}

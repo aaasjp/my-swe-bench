@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-12304",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/django/db/models/enums.py\n+++ b/django/db/models/enums.py\n@@ -31,6 +31,7 @@ class ChoicesMeta(enum.EnumMeta):\n         # label in the choices.\n         cls.label = property(lambda self: cls._value2label_map_.get(self.value))\n+        cls.do_not_call_in_templates = True\n         return enum.unique(cls)\n"
+}

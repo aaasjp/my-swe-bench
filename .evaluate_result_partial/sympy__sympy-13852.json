@@ -1,0 +1,5 @@
+{
+  "instance_id": "sympy__sympy-13852",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/sympy/functions/special/zeta_functions.py\n+++ b/sympy/functions/special/zeta_functions.py\n@@ -272,6 +272,10 @@ class polylog(Function):\n         elif z == -1:\n             return -dirichlet_eta(s)\n         elif z == 0:\n-            return 0\n+            return S.Zero\n+        elif z == S.Half:\n+            if s == 2:\n+                return pi**2/12 - log(2)**2/2\n+        elif z == 2:\n+            if s == -1:\n+                return S.NaN\n \n     def fdiff(self, argindex=1):\n@@ -290,7 +294,7 @@ class polylog(Function):\n     def _eval_expand_func(self, **hints):\n         from sympy import log, expand_mul, Dummy, exp_polar, I\n         s, z = self.args\n         if s == 1:\n-            return -log(1 + exp_polar(-I*pi)*z)\n+            return -log(1 - z)\n         if s.is_Integer and s <= 0:\n             u = Dummy('u')\n             start = u/(1 - u)"
+}

@@ -1,0 +1,5 @@
+{
+  "instance_id": "sphinx-doc__sphinx-9602",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/sphinx/domains/python.py\n+++ b/sphinx/domains/python.py\n@@ -11,6 +11,7 @@\n import builtins\n import inspect\n import re\n+import ast\n import sys\n import typing\n import warnings\n@@ -178,8 +179,14 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Node\n     try:\n         tree = ast_parse(annotation)\n         result = unparse(tree)\n         for i, node in enumerate(result):\n             if isinstance(node, nodes.Text) and node.strip():\n-                result[i] = type_to_xref(str(node), env)\n+                text = str(node)\n+                try:\n+                    ast.literal_eval(text)\n+                except (ValueError, SyntaxError):\n+                    result[i] = type_to_xref(text, env)\n         return result\n     except SyntaxError:\n         return [type_to_xref(annotation, env)]"
+}

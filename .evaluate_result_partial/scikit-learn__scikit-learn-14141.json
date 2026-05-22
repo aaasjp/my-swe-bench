@@ -1,0 +1,1 @@
+{"instance_id": "scikit-learn__scikit-learn-14141", "model_name_or_path": "claudecode-swe-bench", "model_patch": "--- a/sklearn/utils/_show_versions.py\n+++ b/sklearn/utils/_show_versions.py\n@@ -45,6 +45,7 @@ def _get_deps_info():\n        \"pandas\",\n        \"matplotlib\",\n        \"Cython\",\n+        \"joblib\",\n    ]"}

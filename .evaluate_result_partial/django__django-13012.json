@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-13012",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/django/db/models/expressions.py\n+++ b/django/db/models/expressions.py\n@@ -868,6 +868,9 @@ class ExpressionWrapper(Expression):\n     def as_sql(self, compiler, connection):\n         return self.expression.as_sql(compiler, connection)\n \n+    def get_group_by_cols(self, alias=None):\n+        return self.expression.get_group_by_cols(alias=alias)\n+\n     def __repr__(self):\n         return \"{}({})\".format(self.__class__.__name__, self.expression)"
+}

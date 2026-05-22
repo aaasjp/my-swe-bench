@@ -1,0 +1,5 @@
+{
+  "instance_id": "sphinx-doc__sphinx-10323",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "diff --git a/sphinx/directives/code.py b/sphinx/directives/code.py\nindex abc1234..def5678 100644\n--- a/sphinx/directives/code.py\n+++ b/sphinx/directives/code.py\n@@ -220,13 +220,13 @@ class LiteralIncludeReader:\n         if \"diff\" in self.options:\n             lines = self.show_diff()\n         else:\n             filters = [self.pyobject_filter,\n                        self.start_filter,\n                        self.end_filter,\n                        self.lines_filter,\n-                       self.prepend_filter,\n-                       self.append_filter,\n-                       self.dedent_filter]\n+                       self.dedent_filter,\n+                       self.prepend_filter,\n+                       self.append_filter]\n             lines = self.read_file(self.filename, location=location)\n             for func in filters:\n                 lines = func(lines, location=location)\n"
+}

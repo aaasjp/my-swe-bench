@@ -1,0 +1,5 @@
+{
+  "instance_id": "sympy__sympy-17655",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "diff --git a/sympy/geometry/point.py b/sympy/geometry/point.py\nindex 1234567..abcdefg 100644\n--- a/sympy/geometry/point.py\n+++ b/sympy/geometry/point.py\n@@ -276,6 +276,7 @@ class Point(GeometryEntity):\n         factor = sympify(factor)\n         coords = [simplify(x*factor) for x in self.args]\n         return Point(coords, evaluate=False)\n \n+    __rmul__ = __mul__\n \n     def __neg__(self):\n         \"\"\"Negate the point.\"\"\"\n"
+}

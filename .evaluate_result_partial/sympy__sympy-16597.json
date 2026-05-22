@@ -1,0 +1,5 @@
+{
+  "instance_id": "sympy__sympy-16597",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "diff --git a/sympy/core/assumptions.py b/sympy/core/assumptions.py\n--- a/sympy/core/assumptions.py\n+++ b/sympy/core/assumptions.py\n@@ -162,6 +162,7 @@ _assume_rules = FactRules([\n \n     'integer        ->  rational',\n     'rational       ->  real',\n+    'integer        ->  finite',\n     'rational       ->  algebraic',\n     'algebraic      ->  complex',\n     'real           ->  complex',\n"
+}

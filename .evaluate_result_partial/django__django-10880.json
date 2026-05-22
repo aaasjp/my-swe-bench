@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-10880",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/django/db/models/aggregates.py\n+++ b/django/db/models/aggregates.py\n@@ -68,7 +68,7 @@\n \n     def as_sql(self, compiler, connection, **extra_context):\n         extra_context[\"distinct\"] = \"DISTINCT \" if self.distinct else \"\"\n         if self.filter:"
+}

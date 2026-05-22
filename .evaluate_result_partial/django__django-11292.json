@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-11292",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/django/core/management/base.py\n+++ b/django/core/management/base.py\n@@ -94,7 +94,7 @@ class DjangoHelpFormatter(HelpFormatter):\n     --help output before arguments common to all commands.\n     \"\"\"\n     show_last = {\n-        '--version', '--verbosity', '--traceback', '--settings', '--pythonpath',\n+        '--version', '--verbosity', '--traceback', '--settings', '--pythonpath', '--skip-checks',\n         '--no-color', '--force-color',\n     }\n\n@@ -286,6 +286,10 @@ class BaseCommand:\n             '--force-color', action='store_true',\n             help='Force colorization of the command output.',\n         )\n+        parser.add_argument(\n+            '--skip-checks', action='store_true',\n+            help='Skip system checks.',\n+        )\n         self.add_arguments(parser)\n         return parser\n"
+}

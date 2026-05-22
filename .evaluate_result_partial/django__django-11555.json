@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-11555",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/django/db/models/sql/compiler.py\n+++ b/django/db/models/sql/compiler.py\n@@ -721,6 +721,15 @@ class SQLCompiler:\n             already_seen.add(join_tuple)\n\n             results = []\n             for item in opts.ordering:\n+                if hasattr(item, 'resolve_expression'):\n+                    if not isinstance(item, OrderBy):\n+                        item = item.asc()\n+                    if order == 'DESC':\n+                        item = item.copy()\n+                        item.reverse_ordering()\n+                    results.append((item, False))\n+                    continue\n                 results.extend(self.find_ordering_name(item, opts, alias,\n                                                        order, already_seen))\n             return results"
+}

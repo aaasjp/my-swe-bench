@@ -1,0 +1,5 @@
+{
+  "instance_id": "matplotlib__matplotlib-26291",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/lib/mpl_toolkits/axes_grid1/inset_locator.py\n+++ b/lib/mpl_toolkits/axes_grid1/inset_locator.py\n@@ -70,6 +70,7 @@ class AnchoredLocatorBase(AnchoredOffsetbox):\n \n    def __call__(self, ax, renderer):\n        self.axes = ax\n+        self.figure = ax.figure\n        bbox = self.get_window_extent(renderer)\n        px, py = self.get_offset(bbox.width, bbox.height, 0, 0, renderer)\n        bbox_canvas = Bbox.from_bounds(px, py, bbox.width, bbox.height)\n"
+}

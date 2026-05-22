@@ -1,0 +1,5 @@
+{
+  "instance_id": "pytest-dev__pytest-6202",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/src/_pytest/python.py\n+++ b/src/_pytest/python.py\n@@ -286,7 +286,7 @@ class PyobjMixin(PyobjContext):\n             parts.append(name)\n         parts.reverse()\n         s = \".\".join(parts)\n-        return s.replace(\".[\", \"[\")\n+        return s\n \n     def reportinfo(self):\n         # XXX caching?\n"
+}

@@ -1,0 +1,5 @@
+{
+  "instance_id": "sphinx-doc__sphinx-8721",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/sphinx/ext/viewcode.py\n+++ b/sphinx/ext/viewcode.py\n@@ -183,6 +183,9 @@ def collect_pages(app: Sphinx) -> Generator[Tuple[str, Dict[str, Any], str], None\n     if not hasattr(env, '_viewcode_modules'):\n         return\n     highlighter = app.builder.highlighter  # type: ignore\n+    if app.builder.name.startswith(\"epub\") and not env.config.viewcode_enable_epub:\n+        return\n+\n     urito = app.builder.get_relative_uri\n\n     modnames = set(env._viewcode_modules)  # type: ignore\n"
+}

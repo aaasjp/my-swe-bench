@@ -1,0 +1,5 @@
+{
+  "instance_id": "sympy__sympy-20801",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "diff --git a/sympy/core/numbers.py b/sympy/core/numbers.py\nindex 1234567..abcdefg 100644\n--- a/sympy/core/numbers.py\n+++ b/sympy/core/numbers.py\n@@ -1383,13 +1383,13 @@ class Float(Number):\n \n    def __eq__(self, other):\n        from sympy.logic.boolalg import Boolean\n        try:\n            other = _sympify(other)\n        except SympifyError:\n            return NotImplemented\n-        if not self:\n-            return not other\n        if isinstance(other, Boolean):\n            return False\n+        if not self:\n+            return not other\n        if other.is_NumberSymbol:\n            if other.is_irrational:\n                return False\n"
+}

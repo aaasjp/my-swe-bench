@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-14672",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/django/db/models/fields/reverse_related.py\n+++ b/django/db/models/fields/reverse_related.py\n@@ -310,7 +310,7 @@ class ManyToManyRel(ForeignObjectRel):\n     @property\n     def identity(self):\n         return super().identity + (\n             self.through,\n-            self.through_fields,\n+            make_hashable(self.through_fields),\n             self.db_constraint,\n         )"
+}

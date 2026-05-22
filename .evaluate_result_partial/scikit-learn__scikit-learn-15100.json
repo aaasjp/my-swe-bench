@@ -1,0 +1,5 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-15100",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/sklearn/feature_extraction/text.py\n+++ b/sklearn/feature_extraction/text.py\n@@ -130,10 +130,7 @@ def strip_accents_unicode(s):\n     See also\n     --------\n     strip_accents_ascii\n         Remove accentuated char for any unicode symbol that has a direct\n         ASCII equivalent.\n     \"\"\"\n     normalized = unicodedata.normalize('NFKD', s)\n-    if normalized == s:\n-        return s\n-    else:\n-        return ''.join([c for c in normalized if not unicodedata.combining(c)])\n+    return ''.join([c for c in normalized if not unicodedata.combining(c)])\n"
+}

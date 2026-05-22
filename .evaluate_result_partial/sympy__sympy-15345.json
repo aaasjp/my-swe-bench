@@ -1,0 +1,5 @@
+{
+  "instance_id": "sympy__sympy-15345",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/sympy/printing/mathematica.py\n+++ b/sympy/printing/mathematica.py\n@@ -116,6 +116,12 @@ class MCodePrinter(CodePrinter):\n        dvars = [i[0] if i[1] == 1 else i for i in expr.variable_count]\n        return \"Hold[D[\" + ', '.join(self.doprint(a) for a in [dexpr] + dvars) + \"]]\"\n\n+    def _print_Max(self, expr):\n+        return \"Max[\" + \", \".join(self.doprint(a) for a in expr.args) + \"]\"\n+\n+    def _print_Min(self, expr):\n+        return \"Min[\" + \", \".join(self.doprint(a) for a in expr.args) + \"]\"\n+\n\n def mathematica_code(expr, **settings):\n    r\"\"\"Converts an expr to a string of the Wolfram Mathematica code\"\"\""
+}

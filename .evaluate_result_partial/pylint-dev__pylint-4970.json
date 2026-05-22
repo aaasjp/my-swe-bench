@@ -1,0 +1,5 @@
+{
+  "instance_id": "pylint-dev__pylint-4970",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/pylint/checkers/similar.py\n+++ b/pylint/checkers/similar.py\n@@ -528,6 +528,8 @@ class Similar:\n     def _iter_sims(self) -> Generator[Commonality, None, None]:\n         \"\"\"iterate on similarities among all files, by making a cartesian\n         product\n         \"\"\"\n+        if self.min_lines == 0:\n+            return\n         for idx, lineset in enumerate(self.linesets[:-1]):\n             for lineset2 in self.linesets[idx + 1 :]:\n                 yield from self._find_common(lineset, lineset2)\n"
+}

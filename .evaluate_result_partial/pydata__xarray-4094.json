@@ -1,0 +1,5 @@
+{
+  "instance_id": "pydata__xarray-4094",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/xarray/core/dataarray.py\n+++ b/xarray/core/dataarray.py\n@@ -1963,5 +1963,7 @@ class DataArray(AbstractArray, DataWithCoords):\n             data_dict[k] = self.sel({variable_dim: k}).squeeze(drop=True)\n \n         # unstacked dataset\n-        return Dataset(data_dict)\n+        ds = Dataset(data_dict)\n+        # The stacked dim coordinate is still present in each variable - remove it\n+        return ds.drop_vars(dim)\n"
+}

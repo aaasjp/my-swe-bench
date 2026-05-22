@@ -1,0 +1,5 @@
+{
+  "instance_id": "pytest-dev__pytest-5262",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/src/_pytest/capture.py\n+++ b/src/_pytest/capture.py\n@@ -445,6 +445,11 @@ class EncodedFile(object):\n    def name(self):\n        \"\"\"Ensure that file.name is a string.\"\"\"\n        return repr(self.buffer)\n+\n+    @property\n+    def mode(self):\n+        \"\"\"Ensure that file.mode is not binary since EncodedFile expects text.\"\"\"\n+        return self.buffer.mode.replace(\"b\", \"\")\n \n    def __getattr__(self, name):\n        return getattr(object.__getattribute__(self, \"buffer\"), name)\n"
+}

@@ -1,0 +1,5 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-13439",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/sklearn/pipeline.py\n+++ b/sklearn/pipeline.py\n@@ -199,6 +199,12 @@ class Pipeline(_BaseComposition):\n             if trans is not None and trans != 'passthrough':\n                 yield idx, name, trans\n\n+    def __len__(self):\n+        \"\"\"\n+        Returns the length of the Pipeline\n+        \"\"\"\n+        return len(self.steps)\n+\n     def __getitem__(self, ind):\n         \"\"\"Returns a sub-pipeline or a single esimtator in the pipeline\n "
+}

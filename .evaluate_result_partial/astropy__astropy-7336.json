@@ -1,0 +1,5 @@
+{
+  "instance_id": "astropy__astropy-7336",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "diff --git a/astropy/units/decorators.py b/astropy/units/decorators.py\nindex abc1234..def5678 100644\n--- a/astropy/units/decorators.py\n+++ b/astropy/units/decorators.py\n@@ -220,7 +220,10 @@ class QuantityInput:\n             with add_enabled_equivalencies(self.equivalencies):\n                 return_ = wrapped_function(*func_args, **func_kwargs)\n             if wrapped_signature.return_annotation is not inspect.Signature.empty:\n-                return return_.to(wrapped_signature.return_annotation)\n+                if wrapped_signature.return_annotation is not None:\n+                    return return_.to(wrapped_signature.return_annotation)\n+                else:\n+                    return return_\n             else:\n                 return return_"
+}

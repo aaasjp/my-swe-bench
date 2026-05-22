@@ -1,0 +1,19 @@
+
+{
+  "instance_id": "sympy__sympy-12481",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "diff --git a/sympy/combinatorics/permutations.py b/sympy/combinatorics/permutations.py
+--- a/sympy/combinatorics/permutations.py
++++ b/sympy/combinatorics/permutations.py@@ -895,11 ++895,6 @@
+    # counting starts from 1.
+
+    temp = flatten(args)
+-    if has_dups(temp):
+-        if is_cycle:
+-           raise ValueError('there were repeated elements; to resolve 
++          'cycles use Cycle%.' % ''.join([str(tuple(c)) for c in args)))
+-        else:
+-            raise ValueError('there were repeated elements.')
+    temp = set(temp)
+
+    if not is_cycle and \\n"

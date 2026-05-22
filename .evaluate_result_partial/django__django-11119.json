@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-11119",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/django/template/engine.py\n+++ b/django/template/engine.py\n@@ -160,7 +160,7 @@ class Engine:\n         if isinstance(context, Context):\n             return t.render(context)\n         else:\n-            return t.render(Context(context))\n+            return t.render(Context(context, autoescape=self.autoescape))\n"
+}

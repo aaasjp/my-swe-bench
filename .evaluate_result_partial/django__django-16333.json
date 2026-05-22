@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-16333",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "diff --git a/django/contrib/auth/forms.py b/django/contrib/auth/forms.py\n--- a/django/contrib/auth/forms.py\n+++ b/django/contrib/auth/forms.py\n@@ -139,6 +139,8 @@ class UserCreationForm(forms.ModelForm):\n     def save(self, commit=True):\n         user = super().save(commit=False)\n         user.set_password(self.cleaned_data[\"password1\"])\n         if commit:\n             user.save()\n+            self.save_m2m()\n         return user\n"
+}

@@ -1,0 +1,5 @@
+{
+  "instance_id": "sphinx-doc__sphinx-9658",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/sphinx/ext/autodoc/mock.py\n+++ b/sphinx/ext/autodoc/mock.py\n@@ -40,8 +40,6 @@ class _MockObject:\n         return super().__new__(cls)\n \n     def __init__(self, *args: Any, **kwargs: Any) -> None:\n-        self.__qualname__ = ''\n-\n+        pass\n     def __len__(self) -> int:\n         return 0\n"
+}

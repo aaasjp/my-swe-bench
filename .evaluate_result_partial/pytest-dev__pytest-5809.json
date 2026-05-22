@@ -1,0 +1,5 @@
+{
+  "instance_id": "pytest-dev__pytest-5809",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/src/_pytest/pastebin.py\n+++ b/src/_pytest/pastebin.py\n@@ -78,10 +78,7 @@ def create_new_paste(contents):\n         from urllib.parse import urlencode\n \n     params = {\n         \"code\": contents,\n-        \"lexer\": \"python3\" if sys.version_info[0] >= 3 else \"python\",\n+        \"lexer\": \"text\",\n         \"expiry\": \"1week\",\n     }\n     url = \"https://bpaste.net\"\n"
+}

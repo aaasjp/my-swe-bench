@@ -1,0 +1,5 @@
+{
+  "instance_id": "sympy__sympy-21379",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/sympy/functions/elementary/hyperbolic.py\n+++ b/sympy/functions/elementary/hyperbolic.py\n@@ -1,5 +1,6 @@\n from __future__ import print_function\n \n+from sympy.polys.polyerrors import PolynomialError\n from sympy.core import S\n from sympy.core.function import Function, ArgumentIndexError\n from sympy.core.logic import fuzzy_and, fuzzy_not\n@@ -47,6 +48,15 @@ class HyperbolicFunction(Function):\n             return self.func(*new_args)\n         return None\n \n+    def _eval_subs(self, old, new):\n+        # Some hyperbolic functions try to call expand during substitution\n+        # which can raise PolynomialError for expressions containing Piecewise.\n+        # Catch this and let the default substitution behavior handle it.\n+        try:\n+            return super(HyperbolicFunction, self)._eval_subs(old, new)\n+        except PolynomialError:\n+            return None\n+\n     def _eval_is_real(self):\n         arg = self.args[0]\n         if arg.is_real:\n"
+}

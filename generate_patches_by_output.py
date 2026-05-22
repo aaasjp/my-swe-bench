@@ -4,13 +4,14 @@
 
 流程:
 1. 读取数据集的 text 字段
-2. 调用 claude -p 命令，让 Claude 修复问题并将结果写入 JSON 文件
-3. 读取结果并 append 到 predict_result.json
+2. 调用 claude -p 命令，让 Claude 直接生成 JSON 格式结果
+3. 保存到 predict_result.json
 """
 
 import json
 import subprocess
 import argparse
+import re
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -18,34 +19,29 @@ from datasets import load_from_disk
 from typing import Optional
 
 
-JSON_FILE_PROMPT = """
-CRITICAL: After solving the issue, you MUST write your result to this file (do NOT output JSON in your response):
-{result_file}
+JSON_OUTPUT_PROMPT = """
+CRITICAL: After solving the issue, you MUST output ONLY a JSON block, nothing else. The JSON must be the ONLY content in your response.
 
-Write a single JSON object with this exact structure:
+```json
 {{
   "instance_id": "{instance_id}",
   "model_name_or_path": "claudecode-swe-bench",
   "model_patch": "<patch content here>"
 }}
+```
 
 Rules:
-1. Do NOT output the JSON in your response — only write it to {result_file}
-2. Replace "<patch content here>" with the diff content (git apply format)
+1. Output ONLY the JSON block, no explanations
+2. Replace "<patch content here>" with the diff content
 3. model_patch must be a valid JSON string (escape newlines as \\n, quotes as \\")
-4. Do not include <patch> tags in model_patch, just the raw diff text"""
+4. Do not include <patch> tags in model_patch, just the raw diff text
+
+Start your response with the JSON now:"""
 
 
-def call_claude(text: str, instance_id: str, model_name: str, result_file: Path) -> str:
-    """调用 claude CLI 生成 patch 并写入结果 JSON 文件"""
-    result_file.parent.mkdir(parents=True, exist_ok=True)
-    if result_file.exists():
-        result_file.unlink()
-
-    prompt = text + JSON_FILE_PROMPT.format(
-        instance_id=instance_id,
-        result_file=result_file.resolve(),
-    )
+def call_claude(text: str, instance_id: str) -> str:
+    """调用 claude CLI 生成 patch 并写入 JSON 文件"""
+    prompt = text + JSON_OUTPUT_PROMPT.format(instance_id=instance_id)
 
     cmd = [
         "claude",
@@ -68,54 +64,53 @@ def call_claude(text: str, instance_id: str, model_name: str, result_file: Path)
         return f"ERROR: {str(e)}"
 
 
-def read_result_file(result_file: Path, instance_id: str, model_name: str) -> Optional[dict]:
-    """从 Claude 写入的结果 JSON 文件中读取 prediction"""
-    if not result_file.exists():
-        return None
+def parse_json_output(output: str, instance_id: str, model_name: str) -> Optional[dict]:
+    """从 Claude 输出中解析 JSON"""
+    # 移除<think>和</think>标签
+    output = re.sub(r'<start_turn>.*?<end_turn>', '', output, flags=re.DOTALL)
+    output = re.sub(r'<invoke_claude.*?</invoke_claude>', '', output, flags=re.DOTALL)
+    output = re.sub(r'<think>.*?</think>', '', output, flags=re.DOTALL)
 
+    # 尝试多种模式匹配 JSON
+
+    # 模式1: ```json ... ``` 代码块
+    match = re.search(r'```json\s*(\{.*?\})\s*```', output, re.DOTALL)
+    if match:
+        try:
+            return json.loads(match.group(1))
+        except json.JSONDecodeError:
+            pass
+
+    # 模式2: 直接的 { ... } 对象
+    match = re.search(r'(\{[\s\S]*?"instance_id"[\s\S]*?"model_patch"[\s\S]*?"model_name_or_path"[\s\S]*?\})', output)
+    if match:
+        try:
+            return json.loads(match.group(1))
+        except json.JSONDecodeError:
+            pass
+
+    # 模式3: 尝试找最外层的 { }
     try:
-        with open(result_file, encoding="utf-8") as f:
-            content = f.read().strip()
-        if not content:
-            return None
+        # 找到第一个 { 和对应的 }
+        start = output.find('{')
+        if start != -1:
+            # 从 start 开始尝试递增地解析
+            for end in range(len(output), start, -1):
+                try:
+                    parsed = json.loads(output[start:end])
+                    if "instance_id" in parsed and "model_patch" in parsed:
+                        return parsed
+                except json.JSONDecodeError:
+                    continue
+    except:
+        pass
 
-        pred = json.loads(content)
-        if "instance_id" not in pred or "model_patch" not in pred:
-            return None
-
-        pred.setdefault("instance_id", instance_id)
-        pred.setdefault("model_name_or_path", model_name)
-        return pred
-    except (json.JSONDecodeError, OSError):
-        return None
-
-
-def load_existing_predictions(output_path: str) -> dict[str, dict]:
-    """加载已有的预测结果，便于 append 新结果"""
-    path = Path(output_path)
-    if not path.exists():
-        return {}
-
-    try:
-        with open(path, encoding="utf-8") as f:
-            predictions = json.load(f)
-    except (json.JSONDecodeError, OSError):
-        return {}
-
-    if not isinstance(predictions, list):
-        return {}
-
-    return {
-        item["instance_id"]: item
-        for item in predictions
-        if isinstance(item, dict) and "instance_id" in item
-    }
+    return None
 
 
 def process_single_instance(
     row: dict,
     model_name: str,
-    result_file: Path,
     task_num: int,
     total: int,
     print_lock: threading.Lock,
@@ -127,8 +122,8 @@ def process_single_instance(
     with print_lock:
         print(f"[{task_num}/{total}] Processing: {instance_id}")
 
-    output = call_claude(text, instance_id, model_name, result_file)
-    pred = read_result_file(result_file, instance_id, model_name)
+    output = call_claude(text, instance_id)
+    pred = parse_json_output(output, instance_id, model_name)
 
     is_error = False
     if not pred:
@@ -139,7 +134,7 @@ def process_single_instance(
         }
         is_error = True
         with print_lock:
-            print(f"  Warning: Could not read result file for {instance_id}: {result_file}")
+            print(f"  Warning: Could not parse JSON from output for {instance_id}")
 
     result_info = {
         "instance_id": instance_id,
@@ -154,7 +149,7 @@ def generate_predictions(
     model_name: str = "claudecode-swe-bench",
     max_instances: Optional[int] = None,
     start_index: int = 0,
-    max_workers: int = 20,
+    max_workers: int = 10,
 ) -> dict:
     """生成预测结果"""
 
@@ -183,12 +178,7 @@ def generate_predictions(
 
     print(f"Processing {total} instances with {max_workers} workers")
 
-    output_file = Path(output_path)
-    partial_dir = output_file.parent / f".{output_file.stem}_partial"
-    partial_dir.mkdir(parents=True, exist_ok=True)
-
     predictions_by_index: dict[int, dict] = {}
-    existing_predictions = load_existing_predictions(output_path)
     print_lock = threading.Lock()
     save_lock = threading.Lock()
 
@@ -201,12 +191,10 @@ def generate_predictions(
             else:
                 results["completed"] += 1
 
-            merged_predictions = dict(existing_predictions)
-            for index in sorted(predictions_by_index.keys()):
-                merged_predictions[predictions_by_index[index]["instance_id"]] = (
-                    predictions_by_index[index]
-                )
-            save_predictions(list(merged_predictions.values()), output_path, quiet=True)
+            ordered_predictions = [
+                predictions_by_index[i] for i in sorted(predictions_by_index.keys())
+            ]
+            save_predictions(ordered_predictions, output_path, quiet=True)
 
             finished = len(predictions_by_index)
             with print_lock:
@@ -214,9 +202,8 @@ def generate_predictions(
 
     if max_workers <= 1:
         for task_index, row in enumerate(instances, start=1):
-            result_file = partial_dir / f"{row['instance_id']}.json"
             pred, result_info, is_error = process_single_instance(
-                row, model_name, result_file, task_index, total, print_lock
+                row, model_name, task_index, total, print_lock
             )
             handle_result(task_index - 1, pred, result_info, is_error)
     else:
@@ -226,7 +213,6 @@ def generate_predictions(
                     process_single_instance,
                     row,
                     model_name,
-                    partial_dir / f"{row['instance_id']}.json",
                     task_index,
                     total,
                     print_lock,
@@ -290,8 +276,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--max_workers",
         type=int,
-        default=20,
-        help="并行 worker 数量（默认 20，设为 1 则串行执行）"
+        default=10,
+        help="并行 worker 数量（默认 10，设为 1 则串行执行）"
     )
     return parser.parse_args()
 

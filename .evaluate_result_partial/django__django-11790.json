@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-11790",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/django/contrib/auth/forms.py\n+++ b/django/contrib/auth/forms.py\n@@ -61,10 +61,12 @@ class UsernameField(forms.CharField):\n         return unicodedata.normalize('NFKC', super().to_python(value))\n \n     def widget_attrs(self, widget):\n-        return {\n-            **super().widget_attrs(widget),\n-            'autocapitalize': 'none',\n-            'autocomplete': 'username',\n-        }\n+        attrs = super().widget_attrs(widget)\n+        if self.max_length is not None and self.max_length > 0:\n+            attrs['maxlength'] = str(self.max_length)\n+        attrs.setdefault('autocapitalize', 'none')\n+        attrs.setdefault('autocomplete', 'username')\n+        return attrs\n"
+}

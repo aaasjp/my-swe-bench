@@ -1,0 +1,5 @@
+{
+  "instance_id": "sympy__sympy-17318",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/sympy/simplify/sqrtdenest.py\n+++ b/sympy/simplify/sqrtdenest.py\n@@ -157,7 +157,10 @@ def _sqrt_match(p):\n         pargs = sorted(p.args, key=default_sort_key)\n         if all((x**2).is_Rational for x in pargs):\n-            r, b, a = split_surds(p)\n-            res = a, b, r\n-            return list(res)\n+            try:\n+                r, b, a = split_surds(p)\n+            except IndexError:\n+                return []\n+            res = a, b, r\n+            return list(res)\n         # to make the process canonical, the argument is included in the tuple\n         # so when the max is selected, it will be the largest arg having a"
+}

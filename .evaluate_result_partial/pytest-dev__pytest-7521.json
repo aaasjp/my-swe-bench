@@ -1,0 +1,5 @@
+{
+  "instance_id": "pytest-dev__pytest-7521",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/src/_pytest/capture.py\n+++ b/src/_pytest/capture.py\n@@ -387,6 +387,7 @@ class FDCaptureBinary:\n                encoding=\"utf-8\",\n                errors=\"replace\",\n                newline=\"\",\n                write_through=True,\n            )\n"
+}

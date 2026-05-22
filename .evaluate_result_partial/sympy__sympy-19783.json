@@ -1,0 +1,5 @@
+{
+  "instance_id": "sympy__sympy-19783",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "diff --git a/sympy/physics/quantum/operator.py b/sympy/physics/quantum/operator.py\nindex abc1234..def5678 100644\n--- a/sympy/physics/quantum/operator.py\n+++ b/sympy/physics/quantum/operator.py\n@@ -308,7 +308,7 @@ class IdentityOperator(Operator):\n \n     def __mul__(self, other):\n \n-        if isinstance(other, Operator):\n+        if isinstance(other, (Operator, Dagger)):\n             return other\n \n         return Mul(self, other)\n"
+}

@@ -1,5 +1,0 @@
-{
-  "instance_id": "repo_owner__repo_name-issue_number",
-  "model_name_or_path": "claudecode-plus-minimax",
-  "model_patch": "the patch content as a string"
-}

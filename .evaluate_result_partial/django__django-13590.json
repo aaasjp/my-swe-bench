@@ -1,0 +1,5 @@
+{
+  "instance_id": "django__django-13590",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/django/db/models/sql/query.py\n+++ b/django/db/models/sql/query.py\n@@ -1077,7 +1077,12 @@ class Query(BaseExpression):\n        elif isinstance(value, (list, tuple)):\n            # The items of the iterable may be expressions and therefore need\n            # to be resolved independently.\n-            return type(value)(\n+            resolved_values = (\n                self.resolve_lookup_value(sub_value, can_reuse, allow_joins)\n                for sub_value in value\n            )\n+            if hasattr(type(value), \"_make\"):\n+                # Named tuples use _make() to construct from an iterable.\n+                return type(value)._make(resolved_values)\n+            return type(value)(resolved_values)\n        return value\n"
+}

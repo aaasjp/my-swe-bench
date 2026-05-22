@@ -1,0 +1,5 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-14710",
+  "model_name_or_path": "claudecode-swe-bench",
+  "model_patch": "--- a/sklearn/ensemble/_hist_gradient_boosting/gradient_boosting.py\n+++ b/sklearn/ensemble/_hist_gradient_boosting/gradient_boosting.py\n@@ -423,11 +423,17 @@ class BaseHistGradientBoosting(BaseEstimator, ABC):\n     def _check_early_stopping_scorer(self, X_binned_small_train, y_small_train,\n                                      X_binned_val, y_val):\n         \"\"\"Check if fitting should be early-stopped based on scorer.\n\n         Scores are computed on validation data or on training data.\n         \"\"\"\n+        if hasattr(self, 'classes_'):\n+            y_small_train = self.classes_[y_small_train.astype(int)]\n         self.train_score_.append(\n             self.scorer_(self, X_binned_small_train, y_small_train)\n         )\n\n         if self._use_validation_data:\n+            if hasattr(self, 'classes_'):\n+                y_val = self.classes_[y_val.astype(int)]\n             self.validation_score_.append(\n                 self.scorer_(self, X_binned_val, y_val)\n             )\n"
+}

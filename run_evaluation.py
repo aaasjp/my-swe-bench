@@ -61,7 +61,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--predictions_path",
         type=str,
-        default="./evaluate_result.json",
+        default="./predict_result.json",
         help="预测结果文件路径"
     )
     parser.add_argument(
