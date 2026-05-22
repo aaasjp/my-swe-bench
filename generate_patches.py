@@ -12,6 +12,8 @@ import json
 import subprocess
 import argparse
 import re
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from datasets import load_from_disk
 from typing import Optional
@@ -106,73 +108,122 @@ def parse_json_output(output: str, instance_id: str, model_name: str) -> Optiona
     return None
 
 
+def process_single_instance(
+    row: dict,
+    model_name: str,
+    task_num: int,
+    total: int,
+    print_lock: threading.Lock,
+) -> tuple[dict, dict, bool]:
+    """处理单个实例，返回 (prediction, result_info, is_error)"""
+    instance_id = row["instance_id"]
+    text = row["text"]
+
+    with print_lock:
+        print(f"[{task_num}/{total}] Processing: {instance_id}")
+
+    output = call_claude(text, instance_id)
+    pred = parse_json_output(output, instance_id, model_name)
+
+    is_error = False
+    if not pred:
+        pred = {
+            "instance_id": instance_id,
+            "model_name_or_path": model_name,
+            "model_patch": ""
+        }
+        is_error = True
+        with print_lock:
+            print(f"  Warning: Could not parse JSON from output for {instance_id}")
+
+    result_info = {
+        "instance_id": instance_id,
+        "output_length": len(output)
+    }
+    return pred, result_info, is_error
+
+
 def generate_predictions(
     dataset_path: str,
     output_path: str,
     model_name: str = "claudecode-swe-bench",
     max_instances: Optional[int] = None,
-    start_index: int = 0
+    start_index: int = 0,
+    max_workers: int = 10,
 ) -> dict:
     """生成预测结果"""
 
-    # 加载数据集
     dataset_dict = load_from_disk(dataset_path)
 
-    predictions = []
+    instances = []
+    splits = ["test"] if "test" in dataset_dict else list(dataset_dict.keys())
+
+    for split in splits:
+        dataset = dataset_dict[split]
+        end_index = min(len(dataset), start_index + (max_instances or len(dataset)))
+        for i in range(start_index, end_index):
+            instances.append(dataset[i])
+
+    total = len(instances)
     results = {
-        "total_instances": 0,
+        "total_instances": total,
         "completed": 0,
         "errors": 0,
         "results": []
     }
 
-    # 确定要处理哪些 splits
-    splits = ["test"] if "test" in dataset_dict else list(dataset_dict.keys())
+    if total == 0:
+        print("No instances to process.")
+        return results
 
-    for split in splits:
-        dataset = dataset_dict[split]
+    print(f"Processing {total} instances with {max_workers} workers")
 
-        # 确定处理的实例范围
-        end_index = min(len(dataset), start_index + (max_instances or len(dataset)))
+    predictions_by_index: dict[int, dict] = {}
+    print_lock = threading.Lock()
+    save_lock = threading.Lock()
 
-        for i in range(start_index, end_index):
-            row = dataset[i]
-            instance_id = row["instance_id"]
-            text = row["text"]
-
-            results["total_instances"] += 1
-            print(f"[{results['total_instances']}/{max_instances or 'all'}] Processing: {instance_id}")
-
-            # 调用 Claude
-            output = call_claude(text, instance_id)
-
-            # 解析 JSON 输出
-            pred = parse_json_output(output, instance_id, model_name)
-
-            if pred:
-                predictions.append(pred)
-                results["completed"] += 1
-            else:
-                # 如果没找到 JSON，创建空的 prediction
-                predictions.append({
-                    "instance_id": instance_id,
-                    "model_name_or_path": model_name,
-                    "model_patch": ""
-                })
+    def handle_result(task_index: int, pred: dict, result_info: dict, is_error: bool):
+        with save_lock:
+            predictions_by_index[task_index] = pred
+            results["results"].append(result_info)
+            if is_error:
                 results["errors"] += 1
-                print(f"  Warning: Could not parse JSON from output")
+            else:
+                results["completed"] += 1
 
-            results["results"].append({
-                "instance_id": instance_id,
-                "output_length": len(output)
-            })
+            ordered_predictions = [
+                predictions_by_index[i] for i in sorted(predictions_by_index.keys())
+            ]
+            save_predictions(ordered_predictions, output_path, quiet=True)
 
-            # 每 10 个保存一次中间结果
-            if results["total_instances"] % 10 == 0:
-                save_predictions(predictions, output_path)
+            finished = len(predictions_by_index)
+            with print_lock:
+                print(f"  Progress: {finished}/{total} saved to {output_path}")
 
-    # 保存最终结果
-    save_predictions(predictions, output_path)
+    if max_workers <= 1:
+        for task_index, row in enumerate(instances, start=1):
+            pred, result_info, is_error = process_single_instance(
+                row, model_name, task_index, total, print_lock
+            )
+            handle_result(task_index - 1, pred, result_info, is_error)
+    else:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {
+                executor.submit(
+                    process_single_instance,
+                    row,
+                    model_name,
+                    task_index,
+                    total,
+                    print_lock,
+                ): task_index - 1
+                for task_index, row in enumerate(instances, start=1)
+            }
+
+            for future in as_completed(futures):
+                task_index = futures[future]
+                pred, result_info, is_error = future.result()
+                handle_result(task_index, pred, result_info, is_error)
 
     print(f"\n=== Summary ===")
     print(f"Total: {results['total_instances']}")
@@ -182,11 +233,12 @@ def generate_predictions(
     return results
 
 
-def save_predictions(predictions: list, output_path: str):
+def save_predictions(predictions: list, output_path: str, quiet: bool = False):
     """保存预测结果到 JSON 文件"""
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(predictions, f, indent=2, ensure_ascii=False)
-    print(f"  Saved to {output_path}")
+    if not quiet:
+        print(f"  Saved to {output_path}")
 
 
 def parse_args() -> argparse.Namespace:
@@ -221,6 +273,12 @@ def parse_args() -> argparse.Namespace:
         default=0,
         help="Starting index in dataset"
     )
+    parser.add_argument(
+        "--max_workers",
+        type=int,
+        default=10,
+        help="并行 worker 数量（默认 10，设为 1 则串行执行）"
+    )
     return parser.parse_args()
 
 
@@ -240,6 +298,7 @@ if __name__ == "__main__":
     print(f"Output: {args.output_path}")
     print(f"Model: {args.model_name}")
     print(f"Num: {args.num if max_instances is None else args.num}")
+    print(f"Max workers: {args.max_workers}")
     print()
 
     generate_predictions(
@@ -247,5 +306,6 @@ if __name__ == "__main__":
         output_path=args.output_path,
         model_name=args.model_name,
         max_instances=max_instances,
-        start_index=args.start_index
+        start_index=args.start_index,
+        max_workers=args.max_workers,
     )
